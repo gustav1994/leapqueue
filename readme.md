@@ -1,9 +1,7 @@
 # LeapQueue 🐸 ➔ 🚀
-
 LeapQueue is a high-throughput, database-backed job queue for PHP and MySQL. It is designed to handle massive workloads using standard infrastructure, providing a high-speed alternative to external brokers like Redis or RabbitMQ without adding new dependencies to your stack.
 
 ## The "Boring IT" Philosophy
-
 LeapQueue is built on the principle of **"Choosing Boring Technology."** While modern software architecture often leans toward complex microservices and external message brokers, MySQL remains one of the most stable, predictable, and well-understood components of the LAMP stack.
 
 By leveraging advanced MySQL features LeapQueue transforms a standard database table into a high-performance engine. This allows developers to maintain a simple, reliable architecture while achieving enterprise-grade throughput.
@@ -18,13 +16,12 @@ LeapQueue is optimized for scenarios where processing speed and infrastructure s
 * **General Purpose Queuing:** Replacing standard cron-based processing for everyday background tasks like cache warming or webhook handling.
 
 ## Comparative Advantage
-
 LeapQueue is designed to fill the performance gap between traditional scheduling tools and general-purpose framework queues.
 
-### LeapQueue vs. ActionScheduler (WordPress)
+### LeapQueue vs. ActionScheduler for Wordpress
 ActionScheduler is the standard for WordPress, but it is optimized for scheduling and administrative reliability. When the requirement shifts to raw processing power and extreme volumes, ActionScheduler's metadata overhead can become a bottleneck. LeapQueue serves as a "high-speed lane," designed to process the queue as fast as the hardware allows.
 
-### LeapQueue vs. Laravel Queue (Database)
+### LeapQueue vs. Laravel DB Queue
 While Laravel’s database driver is excellent for general use, LeapQueue provides several advanced features not supported natively by the Laravel database driver:
 
 * **Multi-Job Batching:** Laravel typically processes one job per bootstrap cycle. LeapQueue can pull and process hundreds of jobs in a single batch, drastically reducing the "bootstrap tax" and increasing throughput for small tasks.
@@ -32,7 +29,6 @@ While Laravel’s database driver is excellent for general use, LeapQueue provid
 * **Advanced Time-Based Retries:** Sophisticated retry logic with precise time-based backoffs, allowing for granular control over failed tasks without blocking the rest of the engine.
 
 ## Integration and Scaling
-
 LeapQueue is framework-agnostic and requires only a PDO connection. It is built to be easily integrated into WordPress plugins, Laravel applications, or standalone PHP packages.
 
 ### WordPress Integration
