@@ -54,3 +54,26 @@ Detailed performance metrics and stress-test results are added here as testing c
 ## License
 
 MIT License.
+
+---
+
+## Fil- og Folderstruktur
+
+Projektet er organiseret således:
+
+```
+/src
+	/Drivers      -> Database drivers (fx GenericDriver, MySqlDriver, etc.)
+	/Strategies   -> Batch/optimeringslogik (fx AdaptiveEmaStrategy)
+	/Workers      -> Arbejdertyper (fx CliWorker, LoopbackWorker, WordPressWorker)
+	Manager.php   -> Hoved-API
+/database       -> schema.sql (jobs, health)
+sandbox/        -> seed.php, benchmark.php, monitor.php
+docker/         -> Dockerfile, docker-compose.yml
+LICENSE
+readme.md
+composer.json   -> Dependency og autoloading
+.env.example    -> Database config eksempel
+```
+
+Mapperne under `/src` bør være Capital case (PascalCase) for at matche PSR-4 og PHP-namespace konventioner.
