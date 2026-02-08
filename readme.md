@@ -57,7 +57,28 @@ MIT License.
 
 ---
 
-## Fil- og Folderstruktur
+## For Contributors
+To develop and test LeapQueue using Docker:
+
+1. Start the environment from the `docker` folder:
+	```sh
+    docker compose up -d --build
+	```
+
+2. Run PHP scripts (e.g. seed.php) inside the PHP container:
+	```sh
+	docker exec -it <php-container-name> php /app/sandbox/seed.php
+	```
+	(Use `docker ps` to find the container name, typically `docker-php-1` or `php_worker_env`)
+
+3. Open a bash shell in the container for debugging:
+	```sh
+	docker exec -it <php-container-name> bash
+	```
+
+MySQL can be accessed from PHP using the hostname `mysql` and the credentials defined in `docker-compose.yml`.
+
+### Fil- og Folderstruktur
 
 Projektet er organiseret således:
 
