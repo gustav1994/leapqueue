@@ -1,0 +1,15 @@
+{
+    "name": "gustav1994/leapqueue",
+    "description": "High-throughput MySQL-backed job queue for PHP (Boring IT)",
+    "type": "library",
+    "require": {
+        "php": ">=8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LeapQueue\\": "src/"
+        }
+    },
+    "require-dev": {},
+    "license": "MIT"
+}
