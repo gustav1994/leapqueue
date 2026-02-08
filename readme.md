@@ -42,20 +42,12 @@ LeapQueue can be used alongside ActionScheduler. You can keep ActionScheduler fo
 The architecture supports horizontal scaling. You can launch multiple parallel worker processes across different servers or containers without causing database deadlocks or performance degradation, thanks to the non-blocking nature of its selection logic.
 
 ## Performance and Stability
-
 The engine utilizes a self-regulating strategy to ensure stability. Instead of using static batch sizes, it calculates the optimal workload by analyzing previous execution times and memory usage. This ensures the worker always operates within the safe limits of the environment, regardless of the underlying hardware.
 
 ## Benchmarks
-
 Detailed performance metrics and stress-test results are added here as testing continues. These benchmarks focus on Jobs-Per-Second (JPS) rates and system stability under varying levels of concurrency.
 
 *(Benchmark results will be populated following environment testing)*
-
-## License
-
-MIT License.
-
----
 
 ## For Contributors
 To develop and test LeapQueue using Docker:
@@ -98,3 +90,6 @@ composer.json   -> Dependency og autoloading
 ```
 
 Mapperne under `/src` bør være Capital case (PascalCase) for at matche PSR-4 og PHP-namespace konventioner.
+
+## License
+MIT License.
