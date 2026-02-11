@@ -72,11 +72,11 @@ Projektet er organiseret således:
 
 ```
 /src
-	/Drivers      -> Database drivers (fx GenericDriver, MySqlDriver, etc.)
+    /Migrations   -> Database schema
+	/Adapters     -> Database drivers (fx GenericDriver, MySqlDriver, etc.)
 	/Strategies   -> Batch/optimeringslogik (fx AdaptiveEmaStrategy)
 	/Workers      -> Arbejdertyper (fx CliWorker, LoopbackWorker, WordPressWorker)
 	Manager.php   -> Hoved-API
-/database       -> schema.sql (jobs, health)
 sandbox/        -> seed.php, benchmark.php, monitor.php
 docker/         -> Dockerfile, docker-compose.yml
 LICENSE
