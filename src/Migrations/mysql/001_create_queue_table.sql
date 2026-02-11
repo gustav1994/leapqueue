@@ -1,7 +1,4 @@
 -- Queues Tabel (First version)
---
---
---
 CREATE TABLE IF NOT EXISTS {{prefix}}queues (
     
     -- Column Definitions
