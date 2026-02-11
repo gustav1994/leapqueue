@@ -2,7 +2,26 @@
 
 namespace LeapQueue;
 
+use PDO;
+use LeapQueue\Migrations\Migrator;
+
 class Manager
-{
-    // Your code here
+{   
+    public function __construct( protected PDO $db )
+    {                
+        $migrator = new Migrator($this->db);
+
+        $migrator->run(['prefix' => 'leap_']);
+    }
+
+    public function push()
+    {
+
+    }
+
+    public function pull()
+    {
+
+    }    
+   
 }

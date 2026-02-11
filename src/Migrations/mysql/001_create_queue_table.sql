@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS {{prefix}}queues (
+    id SMALLINT UNSIGNED AUTO_INCREMENT,
+    code VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+    created_at TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6),
+    
+    -- Indexes
+    PRIMARY KEY(id),
+    UNIQUE INDEX idx_unique_code (code)
+) ENGINE=INNODB;
