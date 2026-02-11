@@ -6,7 +6,7 @@ use PDO;
 use Exception;
 
 class Migrator
-{    
+{            
     /**
      * We use the new property assignment syntax, where the arguments
      * to the constructor are automatically assigned to properties with the same name.
@@ -14,7 +14,7 @@ class Migrator
      * @param PDO $db
      * @return void
      */
-    public function __construct( protected PDO $db )
+    public function __construct( protected PDO $db, protected array $config = [] )
     {
 
     }   
@@ -26,18 +26,12 @@ class Migrator
      * @param array $config
      * @return void    
      */
-    public function run( array $config = [])
+    public function run()
     {
         $migrations = $this->getRawMigrationStatements();
 
         // Map configuration variables into the search and replace array for the SQL statements, e.g. {{prefix}} => 'vq_'
-        $searchAndReplace = [];
-
-        foreach( $config as $key => $value ) {
-
-            $searchAndReplace['{{'. $key .'}}'] = $value;
-
-        }
+        $searchAndReplace = $this->configToSearchAndReplace($this->config);
 
         foreach( $migrations as $filename => $rawStatement ) {
 
@@ -108,6 +102,32 @@ class Migrator
     protected function prepareMigrationStatement( string $sql, array $searchAndReplace = [] ): string
     {
         return strtr(trim($sql), $searchAndReplace);        
+    }
+
+    /**
+     * Convert the database configuration array into a search and replace 
+     * array for the SQL migration files, where the keys are wrapped in {{}} and the values are cast to string.
+     * 
+     * @param array $config
+     * @return array
+     */
+    protected function configToSearchAndReplace( array $config ): array
+    {
+        $searchAndReplace = [];
+
+        foreach( $config as $key => $value ) {
+
+            if( is_scalar($value) ) {
+                
+                $replaceKey = '{{' . trim($key) . '}}';
+
+                $searchAndReplace[$replaceKey] = (string) $value;
+
+            }            
+
+        }
+
+        return $searchAndReplace;
     }
 
 }
