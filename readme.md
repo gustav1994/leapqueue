@@ -89,3 +89,12 @@ Mapperne under `/src` bør være Capital case (PascalCase) for at matche PSR-4 o
 
 ## License
 MIT License.
+
+## Noter
+
+### Partition på group_code
+Mysql kan kun lave partitioner på integers. Derfor bør vi have en struktur der hedder: queue --> groups --> jobs.
+Derefter skal vi partitionerer jobs tabellen på group_id så vi får lavet 32 partitioner lige fordelt. Det gør det
+hurtigere for Mysql at håndterer parallele request på tværs af grupper.
+
+Ekspert-tip: Overvej at bruge et primtal som 31 eller 37 i stedet for 32. Primtal giver ofte en statistisk mere jævn fordeling af rækker på tværs af partitioner i hashing-algoritmer.
