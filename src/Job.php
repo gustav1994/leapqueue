@@ -2,6 +2,7 @@
 
 namespace LeapQueue;
 
+use LeapQueue\QueueGroup;
 use LeapQueue\Interfaces\CanMigrateInterface;
 use LeapQueue\Traits\DatabaseTrait;
 use LeapQueue\Traits\FactoryTrait;
@@ -9,7 +10,9 @@ use LeapQueue\Traits\OrmTrait;
 
 class Job implements CanMigrateInterface
 {
-    use DatabaseTrait, FactoryTrait, OrmTrait;
+    use DatabaseTrait, FactoryTrait, OrmTrait {
+        OrmTrait::delete as private ormDelete;
+    }
 
     protected static $tableName = 'jobs';
 
@@ -18,6 +21,35 @@ class Job implements CanMigrateInterface
      * @var array
      */
     protected $mutableFields = ['queue_id', 'group_id', 'job', 'available_at'];
+
+    /**
+     * Grab the group id before we delete the job, then delete the job
+     * and afterwards check if we should clean the group (no jobs)
+     * 
+     * @return bool
+     */
+    public function delete() : bool
+    {
+        $groupId = $this->fields['group_id'] ?? null;
+
+        $result = $this->ormDelete();
+        
+        if( !empty($groupId) ) {
+        
+            $sql = "
+                DELETE FROM " . QueueGroup::getTableName() . " AS grp
+                LEFT JOIN " . static::getTableName() . " AS job ON grp.id = job.group_id
+                WHERE job.id IS NULL AND grp.id = :group_id
+                LIMIT 1
+            ";
+            $stmt = static::$db->prepare($sql);
+
+            $stmt->execute(['group_id' => $groupId]);
+
+        }
+
+        return $result;
+    }
 
     public static function migrate() : bool
     {
