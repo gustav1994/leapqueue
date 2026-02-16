@@ -17,7 +17,7 @@ trait OrmTrait
      */
     public function delete() : bool
     {
-        if( empty($this->fields['id']) ) {
+        if( empty($this->id) ) {
             throw new Exception('Cannot delete a model that is not persisted yet. No ID found.');
         }
 
@@ -28,7 +28,7 @@ trait OrmTrait
         ";
         $stmt = static::$db->prepare($sql);
 
-        if( $stmt->execute(['id' => $this->fields['id']]) ) {
+        if( $stmt->execute(['id' => $this->id]) ) {
 
             $this->fields = [];
 

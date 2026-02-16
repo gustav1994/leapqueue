@@ -28,7 +28,7 @@ class Job implements CanMigrateInterface
      */
     public function remove() : bool
     {
-        $groupId = $this->fields['group_id'] ?? null;
+        $groupId = $this->group_id ?? null;
 
         $result = $this->delete();
         
