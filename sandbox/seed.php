@@ -1,6 +1,8 @@
 <?php
 
+    use LeapQueue\Job;
     use LeapQueue\Queue;
+    use LeapQueue\Strategies\VelocityPullStrategy;
     
     require __DIR__ . '/../vendor/autoload.php';
 
@@ -18,7 +20,7 @@
     Queue::migrateAll();
 
     // Check if the sandbox queue already exists, if not then we create it
-    $sandboxQueue = Queue::find('code', 'sandbox');
+    $sandboxQueue = Queue::find(['code' => 'sandbox']);    
 
     if( !$sandboxQueue ) {
 
@@ -29,9 +31,20 @@
     }
 
     // Now we have a queue and we can start pushing jobs into it
-    $jobs = [
-        'job1',
-        'job2',
-        'job3',
-    ];
-    //$sandboxQueue->push($jobs, 'group1');
+    for( $i = 0; $i < 10; $i++ ) {
+        $job = new Job();
+        $job->job = "this is my random job data {$i}";
+
+        var_dump($sandboxQueue->push($job));
+    }
+
+    // Let's see if we can delete the last job
+    echo "Deleting the last job (#{$job->id}) in group {$job->group_id}";
+    var_dump($job->remove());
+
+    // Let's pull out jobs from the queue with the most simple strategy: velocotiy
+    $velocityStrategy = new VelocityPullStrategy();
+
+    $jobs = $sandboxQueue->pull($velocityStrategy);
+
+    echo 'Pulled out ' . count($jobs) . ' jobs ('. implode(',', array_map(fn($job) => $job->id, $jobs)) .') from the queue using velocity strategy' . PHP_EOL;
