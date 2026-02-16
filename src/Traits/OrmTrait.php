@@ -47,7 +47,7 @@ trait OrmTrait
 
         }
         
-        // If we have the primary key (ID) then we update, else insiert
+        // If we have the primary key (ID) then we update, else insert
         $sql = "INSERT INTO ". static::getTableName() ." SET ". implode(', ', $setString);
 
         if( !empty($this->fields['id']) ) {
