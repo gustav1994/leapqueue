@@ -11,6 +11,34 @@ trait OrmTrait
     use DatabaseTrait;
 
     /**
+     * Delete row from the database based on the primary key
+     * 
+     * @return bool
+     */
+    public function delete() : bool
+    {
+        if( empty($this->fields['id']) ) {
+            throw new Exception('Cannot delete a model that is not persisted yet. No ID found.');
+        }
+
+        $sql = "
+            DELETE FROM " . static::getTableName() . "
+            WHERE id = :id
+            LIMIT 1
+        ";
+        $stmt = static::$db->prepare($sql);
+
+        if( $stmt->execute(['id' => $this->fields['id']]) ) {
+
+            $this->fields = [];
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * If we have the ID it's an update, else we perform insert.
      *  
      * Performs two operations always, because we want the model to be 100%
