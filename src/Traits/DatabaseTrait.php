@@ -137,4 +137,15 @@ trait DatabaseTrait
         $this->fields[$name] = $value;
     }
 
+    /**
+     * Retrieve a single property from the $fields array, which is where we hold the queue fields from the database.
+     * 
+     * @param string $name The name of the property being accessed.
+     * @return mixed
+     */
+    public function __get(string $name): mixed
+    {
+        return $this->fields[$name] ?? null;
+    }
+
 }
