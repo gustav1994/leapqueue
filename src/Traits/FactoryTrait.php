@@ -9,24 +9,32 @@ trait FactoryTrait
     use DatabaseTrait;
     
     /**
-     * Retrieves a single record from the database based on a unique index and returns it as an instance of the class.
+     * Retrieves a single record from the database based on conditions
+     * defined in assoc array with key (column) and value (value to match).
      * 
-     * @param string $field
-     * @param mixed $value
+     * @param array $conditions ['field' => 'value']
      * @param ?static
      */
-    public static function find( string $field, mixed $value ) : ?static
-    {
+    public static function find( array $conditions ) : ?static
+    {                   
+        $whereClauses = [];
+
+        foreach( $conditions as $field => $value ) {
+                        
+            $whereClauses[] = "{$field} = :{$field}";
+            
+        }
+
         $sql = "
             SELECT * 
             FROM " . static::getTableName() . "
-            WHERE {$field} = :value
+            WHERE " . implode(' AND ', $whereClauses) . "
             LIMIT 0,1
         ";
         $stmt = static::$db->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, static::class);
 
-        $stmt->execute(['value' => $value]);
+        $stmt->execute($conditions);
 
         return $stmt->fetch() ?: null;
     }
