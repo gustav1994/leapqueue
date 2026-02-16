@@ -68,12 +68,10 @@ MySQL can be accessed from PHP using the hostname `mysql` and the credentials de
 
 ### Fil- og Folderstruktur
 
-Projektet er organiseret således:
-
 ```
 /src
-    /Migrations   -> Database schema
-	/Adapters     -> Database drivers (fx GenericDriver, MySqlDriver, etc.)
+    /Interfaces   -> Contracts for classes
+    /Traits       -> Shared class logic
 	/Strategies   -> Batch/optimeringslogik (fx AdaptiveEmaStrategy)
 	/Workers      -> Arbejdertyper (fx CliWorker, LoopbackWorker, WordPressWorker)
 	Manager.php   -> Hoved-API
@@ -85,16 +83,5 @@ composer.json   -> Dependency og autoloading
 .env.example    -> Database config eksempel
 ```
 
-Mapperne under `/src` bør være Capital case (PascalCase) for at matche PSR-4 og PHP-namespace konventioner.
-
 ## License
 MIT License.
-
-## Noter
-
-### Partition på group_code
-Mysql kan kun lave partitioner på integers. Derfor bør vi have en struktur der hedder: queue --> groups --> jobs.
-Derefter skal vi partitionerer jobs tabellen på group_id så vi får lavet 32 partitioner lige fordelt. Det gør det
-hurtigere for Mysql at håndterer parallele request på tværs af grupper.
-
-Ekspert-tip: Overvej at bruge et primtal som 31 eller 37 i stedet for 32. Primtal giver ofte en statistisk mere jævn fordeling af rækker på tværs af partitioner i hashing-algoritmer.
