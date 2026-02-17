@@ -16,8 +16,8 @@ trait OrmTrait
      * @return bool
      */
     public function delete() : bool
-    {
-        if( empty($this->id) ) {
+    {        
+        if( !isset($this->id) ) {
             throw new Exception('Cannot delete a model that is not persisted yet. No ID found.');
         }
 
@@ -109,7 +109,7 @@ trait OrmTrait
      */
     public function refresh() : bool
     {
-        if( empty($this->id) ) {
+        if( !isset($this->id) ) {
             throw new Exception('Cannot refresh a model that is not persisted yet. No ID found.');
         }
         
@@ -123,7 +123,7 @@ trait OrmTrait
 
         $stmt->execute(['id' => $this->id]);
 
-        $this->fields = $stmt->fetch(PDO::FETCH_ASSOC);
+        $this->fields = (array) $stmt->fetch(PDO::FETCH_ASSOC);
 
         return !empty($this->fields);
     }
