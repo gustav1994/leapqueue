@@ -28,13 +28,12 @@ class Queue implements CanMigrateInterface
      * Using a strategy take out jobs from the queue in a transaction that..
      *   1. Select and lock job FOR UPDATE SKIP LOCKED
      *   2. Update available_at into the future
-     * 
-     * 
-     * 
+     
      * @param PullStrategyInterface $strategy
+     * @param int $visibilityTimeout
      * @return array Array of jobs
      */
-    public function pull( PullStrategyInterface $strategy ) : array
+    public function pull( PullStrategyInterface $strategy, int $visibilityTimeout = 900 ) : array
     {
         $strategyCriteria = $strategy->selectionCriteria($this);
             
@@ -71,7 +70,7 @@ class Queue implements CanMigrateInterface
             // available_at is mroe than current timestamp they cannot be extracted (see above SELECT)    
             $sql = "
                 UPDATE " . Job::getTableName() . "
-                SET available_at = NOW() + INTERVAL 15 MINUTE
+                SET available_at = NOW() + INTERVAL {$visibilityTimeout} SECOND
                 WHERE id IN (". implode(',', array_fill(0, count($filteredJobIds), '?')) . ")
             ";
             $stmt = static::$db->prepare($sql);
