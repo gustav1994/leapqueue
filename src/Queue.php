@@ -36,34 +36,57 @@ class Queue implements CanMigrateInterface
      */
     public function pull( PullStrategyInterface $strategy ) : array
     {
+        $strategyCriteria = $strategy->selectionCriteria($this);
+            
+        // Search conditions and bindings is a combination of the basic criteria
+        // and what is provided by the strategy of choice.
+        $conditions = array_merge(['job.queue_id = :queue_id', 'job.available_at <= NOW()'], $strategyCriteria['where'] ?? '');
+        $bindings = array_merge([':queue_id' => $this->id], $strategyCriteria['bindings'] ?? []);
+
+        // Run the extract and the locking in a transaction, so if we cannot lock the rows for some reason we rollback as well.
         self::$db->beginTransaction();
 
-        $sql = "
-            SELECT *
-            FROM " . Job::getTableName() . "
-            WHERE queue_id = :queue_id AND available_at <= NOW()            
-            LIMIT 5000
-            FOR UPDATE SKIP LOCKED
-        ";
-        $stmt = static::$db->prepare($sql);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, Job::class);        
-        $stmt->execute([':queue_id' => $this->fields['id']]);
+        try {        
+            // Construct the final Query from the information we got from the pull strategy. 
+            // @todo figure out what PDO drivers support "FOR UPDATE SKIP LOCKED".            
+            $sql = "
+                SELECT job.*
+                FROM " . Job::getTableName() . " AS job
+                WHERE ". implode(' AND', $conditions) ."                    
+                LIMIT 0, ". $strategy->getMaxJobs() ."
+                FOR UPDATE SKIP LOCKED
+            ";
+            $stmt = static::$db->prepare($sql);            
+            $stmt->setFetchMode(PDO::FETCH_CLASS, Job::class); 
+            $stmt->execute($bindings);
 
-        $jobs = $stmt->fetchAll();
-        $jobIds = array_map(fn($job) => (int) $job->id, $jobs);
+            $allJobs = $stmt->fetchAll();
+            
+            // Check if the strategy wants to filter the jobs before we lock them
+            $filteredJobs = $strategy->filterJobs($allJobs);
 
-        // Now update and put into the future        
-        $sql = "
-            UPDATE " . Job::getTableName() . "
-            SET available_at = NOW() + INTERVAL 15 MINUTE
-            WHERE id IN (". implode(',', array_fill(0, count($jobIds), '?')) . ")
-        ";
-        $stmt = static::$db->prepare($sql);
-        $stmt->execute($jobIds);
+            $filteredJobIds = array_map(fn($job) => (int) $job->id, $filteredJobs);
 
-        static::$db->commit();
+            // Now we lock the rows by setting the availability into the future. As long as 
+            // available_at is mroe than current timestamp they cannot be extracted (see above SELECT)    
+            $sql = "
+                UPDATE " . Job::getTableName() . "
+                SET available_at = NOW() + INTERVAL 15 MINUTE
+                WHERE id IN (". implode(',', array_fill(0, count($filteredJobIds), '?')) . ")
+            ";
+            $stmt = static::$db->prepare($sql);
+            $stmt->execute($filteredJobIds);            
 
-        return $jobs;
+            self::$db->commit();
+
+        } catch( Exception $e ) {
+            
+            self::$db->rollBack();            
+            throw $e;
+
+        }
+
+        return $filteredJobs;
     }
 
     /**
@@ -71,6 +94,9 @@ class Queue implements CanMigrateInterface
      * we generate a random group code for the job. We distribute this "velocity" queue group id
      * over 1.000 random integers to minimize the risk of collisions and to ensure a more
      * even distribution of jobs across groups.
+     * 
+     * @todo change this to accept batch of jobs and make batch inserts with 1000 rows in each batch.
+     * @todo consider moving the groupCode to the Job model
      * 
      * @param Job $job
      * @param string|null $groupCode
@@ -104,7 +130,7 @@ class Queue implements CanMigrateInterface
     protected function findOrCreateQueueGroup( string $code ) : QueueGroup
     {
         $group = QueueGroup::find([
-            'queue_id' => $this->fields['id'],
+            'queue_id' => (int) $this->id,
             'code' => $code
         ]);
 
@@ -131,7 +157,14 @@ class Queue implements CanMigrateInterface
     {
         $dbConfig = $config['database'] ?? [];
 
-        static::setConnection($dbConfig, $db);
+        // If we cannot set the connection on ourselves, then it will most properly
+        // also throw exceptions in the QueueGroup and Job classes.
+        try {
+            static::setConnection($dbConfig, $db);
+        } catch( Exception $e ) {
+            throw new Exception('Failed to boot LeapQueue: ' . $e->getMessage());
+        }
+        
         QueueGroup::setConnection($dbConfig, static::$db);
         Job::setConnection($dbConfig, static::$db);
     }
