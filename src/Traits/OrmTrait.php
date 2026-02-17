@@ -91,8 +91,10 @@ trait OrmTrait
         
         $stmt->execute($setArray);
         
-        if( empty($this->fields['id']) ) {
-            $this->fields['id'] = static::$db->lastInsertId();
+        if( empty($this->id) ) {
+
+            $this->id = (int) static::$db->lastInsertId();
+
         }
 
         return $stmt->rowCount() == 1;
@@ -107,7 +109,7 @@ trait OrmTrait
      */
     public function refresh() : bool
     {
-        if( empty($this->fields['id']) ) {
+        if( empty($this->id) ) {
             throw new Exception('Cannot refresh a model that is not persisted yet. No ID found.');
         }
         
@@ -119,7 +121,7 @@ trait OrmTrait
         ";
         $stmt = static::$db->prepare($sql);
 
-        $stmt->execute(['id' => $this->fields['id']]);
+        $stmt->execute(['id' => $this->id]);
 
         $this->fields = $stmt->fetch(PDO::FETCH_ASSOC);
 
