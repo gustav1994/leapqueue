@@ -51,7 +51,8 @@ class Queue implements CanMigrateInterface
             $sql = "
                 SELECT job.*
                 FROM " . Job::getTableName() . " AS job
-                WHERE ". implode(' AND', $conditions) ."                    
+                WHERE ". implode(' AND ', $conditions) ."
+                ORDER BY ". $strategy->getOrderBySql() . "
                 LIMIT 0, ". $strategy->getMaxJobs() ."
                 FOR UPDATE SKIP LOCKED
             ";
@@ -63,7 +64,6 @@ class Queue implements CanMigrateInterface
             
             // Check if the strategy wants to filter the jobs before we lock them
             $filteredJobs = $strategy->filterJobs($allJobs);
-
             $filteredJobIds = array_map(fn($job) => (int) $job->id, $filteredJobs);
 
             // Now we lock the rows by setting the availability into the future. As long as 
